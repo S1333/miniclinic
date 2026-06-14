@@ -16,6 +16,8 @@
         .status-COMPLETED { color: #10B981; font-weight: bold; }
         .status-CANCELLED { color: #94A3B8; }
         .btn-cancel { background: #EF4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .btn-complete { background: #10B981; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 13px; margin-right: 8px; }
+        .btn-complete:hover { background: #059669; }
         .btn-cancel:hover { background: #DC2626; }
     </style>
 </head>
@@ -56,6 +58,10 @@
                 <td>
                     <button th:if="${appt.status == 'BOOKED'}"
                             th:data-id="${appt.apptId}"
+                            class="btn-complete"
+                            onclick="completeAppointment(this)">看診完成</button>
+                    <button th:if="${appt.status == 'BOOKED'}"
+                            th:data-id="${appt.apptId}"
                             class="btn-cancel"
                             onclick="cancelAppointment(this)">取消</button>
                 </td>
@@ -82,6 +88,28 @@
                         location.reload();
                     } else {
                         alert('取消失敗，請稍後再試。');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    alert('系統發生錯誤。');
+                });
+            }
+        }
+
+        function completeAppointment(btn) {
+            const id = btn.getAttribute('data-id');
+            if (confirm('確定要將這筆掛號標記為「看診完成」嗎？')) {
+                fetch(`/api/appointments/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'COMPLETED' })
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('更新狀態失敗，請稍後再試。');
                     }
                 })
                 .catch(err => {
